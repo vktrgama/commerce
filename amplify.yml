@@ -1,0 +1,25 @@
+# amplify.yml
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm use 20 || echo "Using default Node"
+        - corepack enable
+        - corepack prepare pnpm@8 --activate
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        # Make selected env vars available at runtime to Next.js SSR
+        - env | grep -e NEXT_PUBLIC_ >> .env.production || true
+        - env | grep -e COMMERCE_PROVIDER >> .env.production || true
+        - env | grep -e SHOPIFY_ >> .env.production || true
+        - pnpm build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
